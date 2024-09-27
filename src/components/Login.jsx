@@ -5,12 +5,11 @@ const Login = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const naviagte = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({ email, password, confirmPassword });
+    console.log({ email, password });
     naviagte('/home')
   };
 
@@ -38,18 +37,6 @@ const Login = () => {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border-b focus:outline-none focus:border-blue-600 border-gray-300 rounded-md p-2"
-              required
-              autoComplete='off'
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-2" htmlFor="confirmPassword">Confirmer le mot de passe</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full border-b focus:outline-none focus:border-blue-600 border-gray-300 rounded-md p-2"
               required
               autoComplete='off'

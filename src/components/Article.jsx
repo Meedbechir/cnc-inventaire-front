@@ -10,7 +10,9 @@ const Article = () => {
   const [articles, setArticles] = useState([]);
   
   const [currentPage, setCurrentPage] = useState(1);
-  const articlesPerPage = 10;
+  const articlesPerPage = 10; 
+  
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetch('http://127.0.0.1:8000/api/articles/')
@@ -68,20 +70,35 @@ const Article = () => {
 
   const indexOfLastArticle = currentPage * articlesPerPage;
   const indexOfFirstArticle = indexOfLastArticle - articlesPerPage;
-  const currentArticles = articles.slice(indexOfFirstArticle, indexOfLastArticle); 
 
-  const totalPages = Math.ceil(articles.length / articlesPerPage); 
+  const filteredArticles = articles.filter(article =>
+    article.designation.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const currentArticles = filteredArticles.slice(indexOfFirstArticle, indexOfLastArticle);
+
+  const totalPages = Math.ceil(filteredArticles.length / articlesPerPage); 
 
   return (
     <>
       <Navbar />
       <div className="p-12">
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md"
-        >
-          Ajouter un nouvel article
-        </button>
+        <div className="flex items-center mb-4">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md"
+          >
+            Ajouter un nouvel article
+          </button>
+
+          <input
+            type="text"
+            placeholder="Recherche"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="border border-gray-400 rounded-md w-full max-w-xs ml-4 p-2 ms-auto"
+          />
+        </div>
 
         {isModalOpen && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

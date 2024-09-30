@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 
 const Article = () => {
@@ -8,10 +8,24 @@ const Article = () => {
   const [origin, setOrigin] = useState('');
   const [family, setFamily] = useState('MI');
   const [articles, setArticles] = useState([]);
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const articlesPerPage = 10;
+
+  useEffect(() => {
+    fetch('http://127.0.0.1:8000/api/articles/')
+      .then((response) => response.json())
+      .then((data) => {
+        setArticles(data); 
+      })
+      .catch((error) => {
+        console.error('Erreur lors de la récupération des articles:', error);
+      });
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     const newArticles = Array.from({ length: quantity }, () => ({
       designation,
       family,
@@ -19,13 +33,31 @@ const Article = () => {
       status: 'Bon',
       location: '',
     }));
-    
-    setArticles(newArticles);
-    setIsModalOpen(false);
-    setDesignation('');
-    setQuantity('');
-    setOrigin('');
-    setFamily('MI'); 
+
+    fetch('http://127.0.0.1:8000/api/articles/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        designation,
+        famille: family,
+        origine: origin,
+        quantite: quantity,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setArticles((prevArticles) => [...prevArticles, ...data.articles]);
+        setIsModalOpen(false);
+        setDesignation('');
+        setQuantity('');
+        setOrigin('');
+        setFamily('MI');
+      })
+      .catch((error) => {
+        console.error('Erreur lors de la création des articles:', error);
+      });
   };
 
   const handleLocationChange = (index, value) => {
@@ -33,6 +65,12 @@ const Article = () => {
     updatedArticles[index].location = value;
     setArticles(updatedArticles);
   };
+
+  const indexOfLastArticle = currentPage * articlesPerPage;
+  const indexOfFirstArticle = indexOfLastArticle - articlesPerPage;
+  const currentArticles = articles.slice(indexOfFirstArticle, indexOfLastArticle); 
+
+  const totalPages = Math.ceil(articles.length / articlesPerPage); 
 
   return (
     <>
@@ -117,7 +155,7 @@ const Article = () => {
 
         {/* Tableau des articles générés */}
         <div className="mt-8">
-          {articles.length > 0 && (
+          {currentArticles.length > 0 && (
             <table className="min-w-full bg-white border border-gray-300">
               <thead>
                 <tr className="bg-gray-200 text-gray-600 text-left">
@@ -126,15 +164,16 @@ const Article = () => {
                   <th className="py-3 px-4 border">Origine</th>
                   <th className="py-3 px-4 border">Emplacement</th>
                   <th className="py-3 px-4 border">État</th>
+                  <th className="py-3 px-4 border">Code Article</th>
                 </tr>
               </thead>
               <tbody>
-                {articles.map((article, index) => (
+                {currentArticles.map((article, index) => (
                   <tr key={index}>
                     <td className="py-3 px-4 border w-1/4">{article.designation}</td>
-                    <td className="py-3 px-4 border">{article.family}</td>
-                    <td className="py-3 px-4 border">{article.origin}</td>
-                    <td className="py-3 px-4 border w-1/4"> 
+                    <td className="py-3 px-4 border">{article.famille}</td>
+                    <td className="py-3 px-4 border">{article.origine}</td>
+                    <td className="py-3 px-4 border w-1/4">
                       <input
                         type="text"
                         value={article.location}
@@ -142,12 +181,30 @@ const Article = () => {
                         className="border border-gray-300 rounded-md w-full p-1"
                       />
                     </td>
-                    <td className="py-3 px-4 border">{article.status}</td>
+                    <td className="py-3 px-4 border">{article.etat}</td>
+                    <td className="py-3 px-4 border">{article.code_article}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           )}
+
+          <div className="flex justify-between mt-4">
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="bg-gray-300 px-4 py-2 rounded-md"
+            >
+              Page précédente
+            </button>
+            <button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="bg-blue-500 px-4 py-2 rounded-md"
+            >
+              Page suivante
+            </button>
+          </div>
         </div>
       </div>
     </>

@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Navbar from './Navbar';
+import ArticleModal from './ArticleModal';
+import ArticleTable from './ArticleTable';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Article = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -8,17 +13,28 @@ const Article = () => {
   const [origin, setOrigin] = useState('');
   const [family, setFamily] = useState('MI');
   const [articles, setArticles] = useState([]);
-  
+  const [locations, setLocations] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const articlesPerPage = 10; 
-  
+  const articlesPerPage = 10;
   const [searchTerm, setSearchTerm] = useState('');
+  const [date, setDate] = useState('');
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/articles/')
-      .then((response) => response.json())
+    fetch('https://cnc-pdb.onrender.com/api/articles/')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Erreur lors de la récupération des articles');
+        }
+        return response.json();
+      })
       .then((data) => {
-        setArticles(data); 
+        const mappedData = data.map(article => ({
+          ...article,
+          famille: article.famille_name, 
+          origine: article.origine_name,
+          isEditing: false,
+        }));
+        setArticles(mappedData);
       })
       .catch((error) => {
         console.error('Erreur lors de la récupération des articles:', error);
@@ -28,15 +44,7 @@ const Article = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const newArticles = Array.from({ length: quantity }, () => ({
-      designation,
-      family,
-      origin,
-      status: 'Bon',
-      location: '',
-    }));
-
-    fetch('http://127.0.0.1:8000/api/articles/', {
+    fetch('https://cnc-pdb.onrender.com/api/articles/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -46,19 +54,41 @@ const Article = () => {
         famille: family,
         origine: origin,
         quantite: quantity,
+        date
       }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then(errData => {
+            throw new Error(errData.message || 'Erreur lors de l\'ajout de l\'article');
+          });
+        }
+        return response.json();
+      })
       .then((data) => {
-        setArticles((prevArticles) => [...prevArticles, ...data.articles]);
+        return fetch('https://cnc-pdb.onrender.com/api/articles/');
+      })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        const mappedData = data.map(article => ({
+          ...article,
+          famille: article.famille_name, 
+          origine: article.origine_name,
+        }));
+        setArticles(mappedData); 
         setIsModalOpen(false);
         setDesignation('');
         setQuantity('');
         setOrigin('');
         setFamily('MI');
+        setDate('');
+        toast.success('Article ajouté avec succès !');
       })
       .catch((error) => {
         console.error('Erreur lors de la création des articles:', error);
+        toast.error(`Erreur lors de l'ajout de l'article: ${error.message}`); 
       });
   };
 
@@ -66,21 +96,72 @@ const Article = () => {
     const updatedArticles = [...articles];
     updatedArticles[index].location = value;
     setArticles(updatedArticles);
+    setLocations(prevLocations => ({
+      ...prevLocations,
+      [updatedArticles[index].id]: value,
+    }));
   };
 
+  const handleEdit = (index) => {
+    const updatedArticles = [...articles];
+    updatedArticles[index].isEditing = !updatedArticles[index].isEditing; 
+    setArticles(updatedArticles);
+  };
+
+  const handleValidate = (article, index) => {
+    if (!article.location) {
+      toast.warning("L'emplacement est requis pour valider l'article.");
+      return;
+    }
+
+    fetch(`https://cnc-pdb.onrender.com/articles/${article.id}/`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        emplacement: article.location,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Erreur lors de la validation de l\'article');
+        }
+        return response.json();
+      })
+      .then((updatedArticle) => {
+        const updatedArticles = [...articles];
+        updatedArticles[index] = {
+          ...updatedArticle.article,
+          isEditing: false,
+          location: locations[updatedArticle.article.id],
+        };
+        setArticles(updatedArticles);
+        toast.success('Article validé avec succès !');
+      })
+      .catch((error) => {
+        console.error('Erreur lors de la validation de l\'article:', error);
+      });
+  };
+
+  // Pagination and search
   const indexOfLastArticle = currentPage * articlesPerPage;
   const indexOfFirstArticle = indexOfLastArticle - articlesPerPage;
 
   const filteredArticles = articles.filter(article =>
-    article.designation.toLowerCase().includes(searchTerm.toLowerCase())
+    article.designation && article.designation.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const currentArticles = filteredArticles.slice(indexOfFirstArticle, indexOfLastArticle);
+  const totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
 
-  const totalPages = Math.ceil(filteredArticles.length / articlesPerPage); 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   return (
     <>
+      <ToastContainer />
       <Navbar />
       <div className="p-12">
         <div className="flex items-center mb-4">
@@ -91,138 +172,46 @@ const Article = () => {
             Ajouter un nouvel article
           </button>
 
+          <ArticleModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSubmit={handleSubmit}
+            designation={designation}
+            setDesignation={setDesignation}
+            quantity={quantity}
+            setQuantity={setQuantity}
+            origin={origin}
+            setOrigin={setOrigin}
+            family={family}
+            setFamily={setFamily}
+          />
+
           <input
             type="text"
-            placeholder="Recherche"
+            placeholder="Rechercher un article"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="border border-gray-400 rounded-md w-full max-w-xs ml-4 p-2 ms-auto"
           />
         </div>
 
-        {isModalOpen && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg p-6 w-3/4 md:w-1/2 lg:w-1/3">
-              <h2 className="text-xl font-bold mb-4">Ajouter des Articles</h2>
-              <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block mb-2">Désignation</label>
-                    <input
-                      type="text"
-                      value={designation}
-                      onChange={(e) => setDesignation(e.target.value)}
-                      className="border border-gray-300 rounded-md w-full p-2"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-2">Quantité</label>
-                    <input
-                      type="number"
-                      value={quantity}
-                      onChange={(e) => setQuantity(e.target.value)}
-                      className="border border-gray-300 rounded-md w-full p-2"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="mb-4">
-                  <label className="block mb-2">Origine</label>
-                  <input
-                    type="text"
-                    value={origin}
-                    onChange={(e) => setOrigin(e.target.value)}
-                    className="border border-gray-300 rounded-md w-full p-2"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block mb-2">Famille</label>
-                  <select
-                    value={family}
-                    onChange={(e) => setFamily(e.target.value)}
-                    className="border border-gray-300 rounded-md w-full p-2"
-                  >
-                    <option value="MI">MI</option>
-                    <option value="MB">MB</option>
-                    <option value="MM">MM</option>
-                    <option value="EM">EM</option>
-                  </select>
-                </div>
-                <div className="flex justify-between mb-4">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="bg-gray-300 px-4 py-2 rounded-md"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md mt-2"
-                  >
-                    Confirmer
-                  </button>
-                </div>
-              </form>
-            </div>
+        {filteredArticles.length === 0 ? (
+          <div className="text-center text-gray-500">
+            Aucun article.
           </div>
+        ) : (
+          <>
+            <ArticleTable
+              articles={currentArticles}
+              handleLocationChange={handleLocationChange}
+              handleValidate={handleValidate}
+              handleEdit={handleEdit}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              setCurrentPage={setCurrentPage}
+            />
+          </>
         )}
-
-        {/* Tableau des articles générés */}
-        <div className="mt-8">
-          {currentArticles.length > 0 && (
-            <table className="min-w-full bg-white border border-gray-300">
-              <thead>
-                <tr className="bg-gray-200 text-gray-600 text-left">
-                  <th className="py-3 px-4 border">Désignation</th>
-                  <th className="py-3 px-4 border">Famille</th>
-                  <th className="py-3 px-4 border">Origine</th>
-                  <th className="py-3 px-4 border">Emplacement</th>
-                  <th className="py-3 px-4 border">État</th>
-                  <th className="py-3 px-4 border">Code Article</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentArticles.map((article, index) => (
-                  <tr key={index}>
-                    <td className="py-3 px-4 border w-1/4">{article.designation}</td>
-                    <td className="py-3 px-4 border">{article.famille}</td>
-                    <td className="py-3 px-4 border">{article.origine}</td>
-                    <td className="py-3 px-4 border w-1/4">
-                      <input
-                        type="text"
-                        value={article.location}
-                        onChange={(e) => handleLocationChange(index, e.target.value)}
-                        className="border border-gray-300 rounded-md w-full p-1"
-                      />
-                    </td>
-                    <td className="py-3 px-4 border">{article.etat}</td>
-                    <td className="py-3 px-4 border">{article.code_article}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-
-          <div className="flex justify-between mt-4">
-            <button
-              onClick={() => setCurrentPage(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="bg-gray-300 px-4 py-2 rounded-md"
-            >
-              Page précédente
-            </button>
-            <button
-              onClick={() => setCurrentPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="bg-blue-500 px-4 py-2 rounded-md"
-            >
-              Page suivante
-            </button>
-          </div>
-        </div>
       </div>
     </>
   );

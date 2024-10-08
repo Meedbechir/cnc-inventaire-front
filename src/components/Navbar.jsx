@@ -9,7 +9,16 @@ const Navbar = () => {
     setIsOpen(!isOpen);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    
+    navigate('/login');
+  };
+
   return (
+    <>
     <nav className="bg-gray-800 p-4 shadow-lg">
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center">
@@ -18,7 +27,6 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Hamburger Button (visible on small screens) */}
         <div className="md:hidden">
           <button onClick={toggleMenu} className="text-white focus:outline-none">
             {isOpen ? (
@@ -55,14 +63,12 @@ const Navbar = () => {
           </button>
         </div>
 
-        {/* Desktop Links (visible on large screens) */}
         <div className="hidden md:flex space-x-4 text-white items-center">
           <a href="/home" className="hover:text-gray-400">Accueil</a>
           <a href="/articles" className="hover:text-gray-400">Articles</a>
           <a href="/users" className="hover:text-gray-400">Utilisateurs</a>
-          <a href="/compte" className="hover:text-gray-400">Compte</a>
           <button 
-            onClick={() => navigate('/login')}
+            onClick={handleLogout}
             className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
           >
             Déconnexion
@@ -70,18 +76,16 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu (visible when isOpen is true) */}
       {isOpen && (
         <div className="md:hidden">
           <div className="space-y-2 text-white text-center">
             <a href="/home" className="block py-2 hover:text-gray-400">Accueil</a>
             <a href="/articles" className="block py-2 hover:text-gray-400">Articles</a>
             <a href="/users" className="block py-2 hover:text-gray-400">Utilisateurs</a>
-            <a href="/compte" className="block py-2 hover:text-gray-400">Compte</a>
             <button 
               onClick={() => {
                 setIsOpen(false);
-                navigate('/login');
+                handleLogout(); 
               }}
               className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md w-full"
             >
@@ -91,6 +95,7 @@ const Navbar = () => {
         </div>
       )}
     </nav>
+    </>
   );
 };
 

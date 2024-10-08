@@ -1,20 +1,51 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const naviagte = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ email, password });
-    naviagte('/home')
+    setIsLoading(true);
+
+    try {
+      console.log(`Attempting to login with email: ${email}`);
+      const response = await axios.post('https://cnc-pdb.onrender.com/api/users/login/', {
+        email: email,
+        password: password,
+      });
+
+      if (response.status === 200) {
+        console.log('Connexion réussie, response :', response.data);
+
+        const { access, refresh } = response.data;
+        localStorage.setItem('authToken', access);
+        localStorage.setItem('refreshToken', refresh);
+
+        toast.success(response.data.message || 'Connexion réussie');
+        
+        navigate('/home');
+      } else {
+        toast.error('Erreur de connexion');
+      }
+    } catch (error) {
+      console.error('Erreur de connexion:', error);
+      toast.error('Email ou mot de passe incorrect');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-blue-800">
+      <ToastContainer />
+
       <div className="bg-white rounded-lg shadow-lg p-8 w-96">
         <h2 className="text-2xl font-bold mb-6 text-center">Page de Connexion</h2>
         <form onSubmit={handleSubmit}>
@@ -25,9 +56,9 @@ const Login = () => {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className=" border-b w-full focus:outline-none focus:border-blue-600 border-gray-300 rounded-md p-2"
+              className="border-b w-full focus:outline-none focus:border-blue-600 border-gray-300 rounded-md p-2"
               required
-              autoComplete='off'
+              autoComplete="off"
             />
           </div>
           <div className="mb-4">
@@ -39,14 +70,15 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full border-b focus:outline-none focus:border-blue-600 border-gray-300 rounded-md p-2"
               required
-              autoComplete='off'
+              autoComplete="off"
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white rounded-md p-2 hover:bg-blue-700 transition duration-200"
+            disabled={isLoading}
+            className={`w-full bg-blue-600 text-white rounded-md p-2 hover:bg-blue-700 transition duration-200 ${isLoading ? 'opacity-50' : ''}`}
           >
-            Se connecter
+            {isLoading ? 'Connexion...' : 'Se connecter'}
           </button>
         </form>
       </div>

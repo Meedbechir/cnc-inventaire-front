@@ -114,7 +114,7 @@ const Article = () => {
       return;
     }
 
-    fetch(`https://cnc-pdb.onrender.com/articles/${article.id}/`, {
+    fetch(`https://cnc-pdb.onrender.com/api/articles/${article.id}/`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

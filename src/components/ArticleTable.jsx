@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaCheckCircle, FaPencilAlt, FaEye } from 'react-icons/fa';
-import ArticleDetailModal from './ArticleDetailModal'; 
+import ArticleDetailModal from './ArticleDetailModal';
 
 const ArticleTable = ({
   articles,
@@ -26,7 +26,7 @@ const ArticleTable = ({
 
   return (
     <>
-      {articles.length > 0 && (
+      {articles.length > 0 ? (
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
             <tr className="bg-gray-200 text-gray-600 text-left">
@@ -38,19 +38,19 @@ const ArticleTable = ({
             </tr>
           </thead>
           <tbody>
-            {articles.map((article, index) => (
-              <tr key={index}>
-                <td className="py-3 px-4 border w-1/4">{article.designation}</td>
+            {articles.map((article) => (
+              <tr key={article.id}>
+                <td className="py-3 px-4 border w-1/4">{article.designation || 'Non spécifiée'}</td>
                 <td className="py-3 px-4 border w-1/4">
                   <input
                     type="text"
-                    value={article.location}
-                    onChange={(e) => handleLocationChange(index, e.target.value)}
+                    value={article.location || ''}
+                    onChange={(e) => handleLocationChange(article.id, e.target.value)} // Utiliser article.id
                     className="border border-gray-300 rounded-md w-full p-1"
                     disabled={!article.isEditing}
                   />
                 </td>
-                <td className="py-3 px-4 border">Moyen</td>
+                <td className="py-3 px-4 border">{article.etat || 'Non spécifié'}</td>
                 <td className="py-3 px-4 border">{article.code_article || 'Non généré'}</td>
                 <td className="py-3 px-4 border">
                   <div className="flex space-x-4">
@@ -60,11 +60,11 @@ const ArticleTable = ({
                     />
                     <FaPencilAlt
                       className="text-yellow-500 cursor-pointer"
-                      onClick={() => handleEdit(index)}
+                      onClick={() => handleEdit(article.id)} // Utiliser article.id
                     />
                     <FaCheckCircle
                       className={`text-green-500 cursor-pointer ${!article.location ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      onClick={() => handleValidate(article, index)}
+                      onClick={() => handleValidate(article.id)} // Utiliser article.id
                     />
                   </div>
                 </td>
@@ -72,6 +72,8 @@ const ArticleTable = ({
             ))}
           </tbody>
         </table>
+      ) : (
+        <div className="text-center text-gray-500">Aucun article à afficher.</div>
       )}
 
       {isDetailModalOpen && (
@@ -82,23 +84,25 @@ const ArticleTable = ({
       )}
 
       {/* Pagination */}
-      <div className="flex justify-between mt-4">
-        <button
-          onClick={() => setCurrentPage(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="bg-gray-300 px-4 py-2 rounded-md"
-        >
-          Page précédente
-        </button>
-        <span>Page {currentPage} sur {totalPages}</span>
-        <button
-          onClick={() => setCurrentPage(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="bg-blue-500 px-4 py-2 rounded-md"
-        >
-          Page suivante
-        </button>
-      </div>
+      {totalPages > 1 && (
+        <div className="flex justify-between mt-4">
+          <button
+            onClick={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="bg-gray-300 px-4 py-2 rounded-md"
+          >
+            Page précédente
+          </button>
+          <span>Page {currentPage} sur {totalPages}</span>
+          <button
+            onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="bg-blue-500 px-4 py-2 rounded-md"
+          >
+            Page suivante
+          </button>
+        </div>
+      )}
     </>
   );
 };

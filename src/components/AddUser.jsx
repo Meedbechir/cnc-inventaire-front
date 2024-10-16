@@ -20,7 +20,7 @@ const AddUser = () => {
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('https://cnc-pdb.onrender.com/api/users/userslist/');
+      const response = await axios.get('http://127.0.0.1:8000/api/users/userslist/');
       setUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -38,7 +38,7 @@ const AddUser = () => {
 
     setIsLoading(true);
     try {
-      const response = await axios.post('https://cnc-pdb.onrender.com/api/users/register/', {
+      const response = await axios.post('http://127.0.0.1:8000/api/users/register/', {
         username: name,
         email: email,
         password: password,

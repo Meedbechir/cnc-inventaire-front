@@ -16,7 +16,7 @@ const Login = () => {
 
     try {
       console.log(`Attempting to login with email: ${email}`);
-      const response = await axios.post('https://cnc-pdb.onrender.com/api/users/login/', {
+      const response = await axios.post('http://127.0.0.1:8000/api/users/login/', {
         email: email,
         password: password,
       });
@@ -43,7 +43,7 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-gray-300 to-blue-300">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-gray-300 to-white-500">
       <ToastContainer />
 
       <div className="bg-white rounded-lg shadow-lg p-8 w-96">

@@ -6,6 +6,7 @@ import Article from './components/Article';
 import AddUser from './components/AddUser';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute'; 
+import Designation from './components/Designation';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/articles" element={<PrivateRoute element={Article} />} />
         <Route path="/users" element={<PrivateRoute element={AddUser} />} />
         <Route path="/navbar" element={<PrivateRoute element={Navbar} />} />
+        <Route path="/designations" element={<PrivateRoute element={Designation} />} />
       </Routes>
     </Router>
   );

@@ -65,8 +65,9 @@ const Navbar = () => {
 
         <div className="hidden md:flex space-x-4 text-white items-center">
           <a href="/home" className="hover:text-gray-400">Accueil</a>
-          <a href="/articles" className="hover:text-gray-400">Articles</a>
           <a href="/users" className="hover:text-gray-400">Utilisateurs</a>
+          <a href="/designations" className="hover:text-gray-400">Articles</a>
+          <a href="/articles" className="hover:text-gray-400">Liste des Articles</a>
           <button 
             onClick={handleLogout}
             className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"

@@ -16,7 +16,7 @@ const Login = () => {
 
     try {
       console.log(`Attempting to login with email: ${email}`);
-      const response = await axios.post('http://127.0.0.1:8000/api/users/login/', {
+      const response = await axios.post('https://cnc-pdb.onrender.com/api/users/login/', {
         email: email,
         password: password,
       });

@@ -60,11 +60,11 @@ const ArticleTable = ({
                     />
                     <FaPencilAlt
                       className="text-yellow-500 cursor-pointer"
-                      onClick={() => handleEdit(article.id)} // Utiliser article.id
+                      onClick={() => handleEdit(article.id)}
                     />
                     <FaCheckCircle
                       className={`text-green-500 cursor-pointer ${!article.location ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      onClick={() => handleValidate(article.id)} // Utiliser article.id
+                      onClick={() => handleValidate(article.id)} 
                     />
                   </div>
                 </td>

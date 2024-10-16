@@ -22,7 +22,7 @@ const ArticleManager = () => {
 
   const fetchDesignations = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/designations/');
+      const response = await fetch('https://cnc-pdb.onrender.com/api/designations/');
       const data = await response.json();
       setDesignations(data);
     } catch (error) {
@@ -32,7 +32,7 @@ const ArticleManager = () => {
 
   const fetchFamilies = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/familles/');
+      const response = await fetch('https://cnc-pdb.onrender.com/api/familles/');
       const data = await response.json();
       setFamilies(data);
     } catch (error) {
@@ -43,7 +43,7 @@ const ArticleManager = () => {
   const handleDesignationSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://127.0.0.1:8000/api/designations/', { nom: newDesignation });
+      await axios.post('https://cnc-pdb.onrender.com/api/designations/', { nom: newDesignation });
       toast.success('Désignation ajoutée avec succès !');
       setNewDesignation('');
       fetchDesignations();
@@ -60,7 +60,7 @@ const ArticleManager = () => {
 
   const handleConfirm = async () => {
     try {
-      await axios.post('http://127.0.0.1:8000/api/articles/', {
+      await axios.post('https://cnc-pdb.onrender.com/api/articles/', {
         designation_id: selectedDesignationId,
         quantite: parseInt(quantity),
         origine: origin,
@@ -107,35 +107,38 @@ const ArticleManager = () => {
         </div>
 
         {step === 1 && (
-          <div className="p-4 border rounded-lg shadow">
-            <h3 className="text-xl font-semibold mb-4">Choisir l'Origine</h3>
-            <div className="flex justify-around">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  value="Achat"
-                  checked={origin === 'Achat'}
-                  onChange={(e) => setOrigin(e.target.value)}
-                  required
-                />
-                Achat
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  value="Don"
-                  checked={origin === 'Don'}
-                  onChange={(e) => setOrigin(e.target.value)}
-                  required
-                />
-                Don
-              </label>
-            </div>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-md w-full mt-4" onClick={() => setStep(2)}>
-              Suivant
-            </button>
-          </div>
-        )}
+  <div className="p-6 border rounded-lg shadow-lg bg-white">
+    <h3 className="text-2xl font-semibold mb-6 text-center text-gray-800">Choisir l'Origine</h3>
+    <div className="flex justify-around mb-6">
+      <label className="flex items-center text-gray-700 p-3 border border-gray-300 rounded-md shadow-sm hover:shadow-md transition">
+        <input
+          type="radio"
+          value="Achat"
+          checked={origin === 'Achat'}
+          onChange={(e) => setOrigin(e.target.value)}
+          required
+          className="mr-2"
+        />
+        <span className="font-medium">Achat</span>
+      </label>
+      <label className="flex items-center text-gray-700 p-3 border border-gray-300 rounded-md shadow-sm hover:shadow-md transition">
+        <input
+          type="radio"
+          value="Don"
+          checked={origin === 'Don'}
+          onChange={(e) => setOrigin(e.target.value)}
+          required
+          className="mr-2"
+        />
+        <span className="font-medium">Don</span>
+      </label>
+    </div>
+    <button className="bg-blue-600 text-white px-6 py-3 rounded-md w-full transition duration-200 hover:bg-blue-700 shadow-md" onClick={() => setStep(2)}>
+      Suivant
+    </button>
+  </div>
+)}
+
 
         {step === 2 && (
           <div className="p-4 border rounded-lg shadow">

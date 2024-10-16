@@ -19,7 +19,7 @@ const Article = () => {
   const fetchArticles = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/articles/');
+      const response = await fetch('https://cnc-pdb.onrender.com/api/articles/');
       if (!response.ok) {
         throw new Error('Erreur lors de la récupération des articles');
       }
@@ -67,7 +67,7 @@ const Article = () => {
     }
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/articles/${articleId}/`, {
+      const response = await fetch(`https://cnc-pdb.onrender.com/api/articles/${articleId}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

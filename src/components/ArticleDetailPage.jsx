@@ -42,11 +42,11 @@ const ArticleDetailPage = () => {
         <h2 className="text-4xl font-semibold mb-6 text-gray-800 text-center">Détails de l'Article</h2>
         <div className="space-y-4">
           {[  
-            { label: "Désignation", value: article.designation || 'Non spécifiée' },
+            { label: "Désignation", value: article.designation_nom || 'Non spécifiée' },
             { label: "Famille", value: article.famille_nom || 'Non spécifié' },
             { label: "Origine", value: article.details_entree[0]?.origine_nom || 'Non spécifié' },
             { label: "Emplacement", value: article.details_entree[0]?.emplacement_nom || 'Pas défini' },
-            { label: "Code Article", value: article.code_article || 'Non généré' },
+            { label: "Code Article", value: article.details_entree[0]?.code_article || 'Non généré' },
             { label: "Marque", value: article.details_entree[0]?.marque || 'Non spécifié' },
             { label: "Modèle", value: article.details_entree[0]?.modele || 'Non spécifié' },
             { label: "Date Ajout", value: article.details_entree[0]?.date_ajout || 'Non spécifié' },

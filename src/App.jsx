@@ -7,7 +7,9 @@ import AddUser from './components/AddUser';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute'; 
 import Designation from './components/Designation';
-import ArticleDetailPage from './components/ArticleDetailPage'
+import ArticleDetailPage from './components/ArticleDetailPage';
+import ArticleCreation from './components/ArticleCreation';
+
 
 function App() {
   return (
@@ -16,9 +18,10 @@ function App() {
         <Route path="/login" element={<Login />} /> 
         <Route path="/" element={<Login />} /> 
         {/* Routes protégées */}
-        <Route path="/home" element={<PrivateRoute element={Designation} />} /> 
+        <Route path="/home" element={<PrivateRoute element={ArticleCreation} />} /> 
         <Route path="/articles" element={<PrivateRoute element={Article} />} />
         <Route path="/articles/:id" element={<PrivateRoute element={ArticleDetailPage} />} />
+        <Route path="/create-article" element={<PrivateRoute element={ArticleCreation} />} />
         <Route path="/users" element={<PrivateRoute element={AddUser} />} />
         <Route path="/navbar" element={<PrivateRoute element={Navbar} />} />
         <Route path="/designations" element={<PrivateRoute element={Designation} />} />

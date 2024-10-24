@@ -64,7 +64,8 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex space-x-4 text-white items-center">
-          <a href="/home" className="hover:text-gray-400">Accueil</a>
+          <a href="/home" className="hover:text-gray-400">Créer un article</a>
+          <a href="/designations" className="block py-2 hover:text-gray-400">Générer des articles</a>
           <a href="/articles" className="hover:text-gray-400">Liste des Articles</a>
           <a href="/users" className="hover:text-gray-400">Utilisateurs</a>
           {/* <a href="/designations" className="hover:text-gray-400">Articles</a> */}

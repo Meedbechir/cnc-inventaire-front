@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaCheckCircle, FaPencilAlt, FaEye } from 'react-icons/fa';
-import ArticleDetailModal from './ArticleDetailModal';
+import { useNavigate } from 'react-router-dom';
 
 const ArticleTable = ({
   articles,
@@ -11,17 +11,9 @@ const ArticleTable = ({
   totalPages,
   setCurrentPage,
 }) => {
-  const [selectedArticle, setSelectedArticle] = React.useState(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = React.useState(false);
-
-  const openDetailModal = (article) => {
-    setSelectedArticle(article);
-    setIsDetailModalOpen(true);
-  };
-
-  const closeDetailModal = () => {
-    setSelectedArticle(null);
-    setIsDetailModalOpen(false);
+  const navigate = useNavigate();
+  const openDetailPage = (articleId) => {
+    navigate(`/articles/${articleId}`); 
   };
 
   return (
@@ -45,7 +37,7 @@ const ArticleTable = ({
                   <input
                     type="text"
                     value={article.location || ''}
-                    onChange={(e) => handleLocationChange(article.id, e.target.value)} // Utiliser article.id
+                    onChange={(e) => handleLocationChange(article.id, e.target.value)}
                     className="border border-gray-300 rounded-md w-full p-1"
                     disabled={!article.isEditing}
                   />
@@ -56,7 +48,7 @@ const ArticleTable = ({
                   <div className="flex space-x-4">
                     <FaEye
                       className="text-blue-500 cursor-pointer"
-                      onClick={() => openDetailModal(article)}
+                      onClick={() => openDetailPage(article.id)} 
                     />
                     <FaPencilAlt
                       className="text-yellow-500 cursor-pointer"
@@ -74,13 +66,6 @@ const ArticleTable = ({
         </table>
       ) : (
         <div className="text-center text-gray-500">Aucun article à afficher.</div>
-      )}
-
-      {isDetailModalOpen && (
-        <ArticleDetailModal
-          article={selectedArticle}
-          onClose={closeDetailModal}
-        />
       )}
 
       {/* Pagination */}

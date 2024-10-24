@@ -7,6 +7,7 @@ import AddUser from './components/AddUser';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute'; 
 import Designation from './components/Designation';
+import ArticleDetailPage from './components/ArticleDetailPage'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         {/* Routes protégées */}
         <Route path="/home" element={<PrivateRoute element={Designation} />} /> 
         <Route path="/articles" element={<PrivateRoute element={Article} />} />
+        <Route path="/articles/:id" element={<PrivateRoute element={ArticleDetailPage} />} />
         <Route path="/users" element={<PrivateRoute element={AddUser} />} />
         <Route path="/navbar" element={<PrivateRoute element={Navbar} />} />
         <Route path="/designations" element={<PrivateRoute element={Designation} />} />

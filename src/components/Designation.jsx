@@ -4,8 +4,10 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Navbar from './Navbar';
 import { FaArrowLeft } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
-const ArticleManager = () => {
+const Designation = () => {
+  const naviagte = useNavigate(); 
   const [step, setStep] = useState(1);
   const [newDesignation, setNewDesignation] = useState('');
   const [designations, setDesignations] = useState([]);
@@ -14,6 +16,10 @@ const ArticleManager = () => {
   const [quantity, setQuantity] = useState('');
   const [origin, setOrigin] = useState('');
   const [family, setFamily] = useState('');
+  const [marque, setMarque] = useState(''); 
+  const [modele, setModele] = useState('');
+  const [codeArticle, setCodeArticle] = useState([]);
+  const [statusArticle, setStatusArticle] = useState([]);
 
   useEffect(() => {
     fetchDesignations();
@@ -22,7 +28,7 @@ const ArticleManager = () => {
 
   const fetchDesignations = async () => {
     try {
-      const response = await fetch('https://cnc-pdb.onrender.com/api/designations/');
+      const response = await fetch('https://fbackup-cnc.onrender.com/api/designations/');
       const data = await response.json();
       setDesignations(data);
     } catch (error) {
@@ -32,9 +38,10 @@ const ArticleManager = () => {
 
   const fetchFamilies = async () => {
     try {
-      const response = await fetch('https://cnc-pdb.onrender.com/api/familles/');
+      const response = await fetch('https://fbackup-cnc.onrender.com/api/familles/');
       const data = await response.json();
-      setFamilies(data);
+      const filteredData = data.filter(fam => typeof fam.nom === 'string' && isNaN(fam.nom));
+      setFamilies(filteredData);
     } catch (error) {
       console.error('Erreur lors de la récupération des familles:', error);
     }
@@ -43,7 +50,7 @@ const ArticleManager = () => {
   const handleDesignationSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('https://cnc-pdb.onrender.com/api/designations/', { nom: newDesignation });
+      await axios.post('https://fbackup-cnc.onrender.com/api/designations/', { nom: newDesignation });
       toast.success('Désignation ajoutée avec succès !');
       setNewDesignation('');
       fetchDesignations();
@@ -60,22 +67,61 @@ const ArticleManager = () => {
 
   const handleConfirm = async () => {
     try {
-      await axios.post('https://cnc-pdb.onrender.com/api/articles/', {
+     
+      const response = await axios.post('https://fbackup-cnc.onrender.com/api/articles/', {
         designation_id: selectedDesignationId,
         quantite: parseInt(quantity),
         origine: origin,
         famille: family,
+        marque: marque,
+        modele: modele,
       });
+
+      const articles = response.data.articles; 
+      const codes = [];
+      const statuses = [];
+
+      articles.forEach(article => {
+        codes.push(article.details_entree[0]?.code_article || 'non généré');
+        statuses.push(article.details_entree[0]?.status?.status_article || 'non spécifié');
+      });
+
+      setCodeArticle(codes);
+      setStatusArticle(statuses);
+      
       toast.success('Article ajouté avec succès !');
-      setStep(1);
-      setNewDesignation('');
-      setSelectedDesignationId('');
-      setQuantity('');
-      setOrigin('');
-      setFamily('');
+      setStep(6); 
     } catch (error) {
       toast.error(`Erreur lors de l'ajout de l'article: ${error.message}`);
     }
+  };
+
+  const handleDelete = () => {
+    setSelectedDesignationId('');
+    setQuantity('');
+    setOrigin('');
+    setFamily('');
+    setMarque('');
+    setModele('');
+    setCodeArticle([]);
+    setStatusArticle([]);
+    setStep(1); 
+  };
+
+  const handleSave = () => {
+    setNewDesignation('');
+    setDesignations([]);
+    setFamilies([]);
+    setSelectedDesignationId('');
+    setQuantity('');
+    setOrigin('');
+    setFamily('');
+    setMarque('');
+    setModele('');
+    setCodeArticle([]);
+    setStatusArticle([]);
+    toast.success('Toutes les informations ont été enregistrées !'); 
+    naviagte('/articles'); 
   };
 
   const handleBack = () => {
@@ -87,6 +133,8 @@ const ArticleManager = () => {
       setStep(3);
     } else if (step === 5) {
       setStep(4);
+    } else if (step === 6) {
+      setStep(5);
     }
   };
 
@@ -107,38 +155,37 @@ const ArticleManager = () => {
         </div>
 
         {step === 1 && (
-  <div className="p-6 border rounded-lg shadow-lg bg-white">
-    <h3 className="text-2xl font-semibold mb-6 text-center text-gray-800">Choisir l'Origine</h3>
-    <div className="flex justify-around mb-6">
-      <label className="flex items-center text-gray-700 p-3 border border-gray-300 rounded-md shadow-sm hover:shadow-md transition">
-        <input
-          type="radio"
-          value="Achat"
-          checked={origin === 'Achat'}
-          onChange={(e) => setOrigin(e.target.value)}
-          required
-          className="mr-2"
-        />
-        <span className="font-medium">Achat</span>
-      </label>
-      <label className="flex items-center text-gray-700 p-3 border border-gray-300 rounded-md shadow-sm hover:shadow-md transition">
-        <input
-          type="radio"
-          value="Don"
-          checked={origin === 'Don'}
-          onChange={(e) => setOrigin(e.target.value)}
-          required
-          className="mr-2"
-        />
-        <span className="font-medium">Don</span>
-      </label>
-    </div>
-    <button className="bg-blue-600 text-white px-6 py-3 rounded-md w-full transition duration-200 hover:bg-blue-700 shadow-md" onClick={() => setStep(2)}>
-      Suivant
-    </button>
-  </div>
-)}
-
+          <div className="p-6 border rounded-lg shadow-lg bg-white">
+            <h3 className="text-2xl font-semibold mb-6 text-center text-gray-800">Choisir l'Origine</h3>
+            <div className="flex justify-around mb-6">
+              <label className="flex items-center text-gray-700 p-3 border border-gray-300 rounded-md shadow-sm hover:shadow-md transition">
+                <input
+                  type="radio"
+                  value="Achat"
+                  checked={origin === 'Achat'}
+                  onChange={(e) => setOrigin(e.target.value)}
+                  required
+                  className="mr-2"
+                />
+                <span className="font-medium">Achat</span>
+              </label>
+              <label className="flex items-center text-gray-700 p-3 border border-gray-300 rounded-md shadow-sm hover:shadow-md transition">
+                <input
+                  type="radio"
+                  value="Don"
+                  checked={origin === 'Don'}
+                  onChange={(e) => setOrigin(e.target.value)}
+                  required
+                  className="mr-2"
+                />
+                <span className="font-medium">Don</span>
+              </label>
+            </div>
+            <button className="bg-blue-600 text-white px-6 py-3 rounded-md w-full transition duration-200 hover:bg-blue-700 shadow-md" onClick={() => setStep(2)}>
+              Suivant
+            </button>
+          </div>
+        )}
 
         {step === 2 && (
           <div className="p-4 border rounded-lg shadow">
@@ -211,31 +258,84 @@ const ArticleManager = () => {
               >
                 <option value="">Sélectionnez une famille</option>
                 {families.map((fam) => (
-                  <option key={fam.id} value={fam.nom}>{fam.nom}</option>
+                  <option key={fam.id} value={fam.id}>{fam.nom}</option>
                 ))}
               </select>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md w-full transition-transform transform hover:scale-105" type="submit">
-                Ajouter Article
+              <input
+                type="text"
+                value={marque}
+                onChange={(e) => setMarque(e.target.value)}
+                placeholder="Marque"
+                className="border border-gray-300 rounded-md p-3 w-full shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+              <input
+                type="text"
+                value={modele}
+                onChange={(e) => setModele(e.target.value)}
+                placeholder="Modèle"
+                className="border border-gray-300 rounded-md p-3 w-full shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+              <button className="bg-green-600 text-white px-4 py-2 rounded-md w-full mt-4" onClick={handleConfirm}>
+                Ajouter l'Article
+              </button>
+              <button type="button" className="bg-red-600 text-white px-4 py-2 rounded-md w-full mt-4" onClick={handleDelete}>
+                Supprimer
               </button>
             </form>
           </div>
         )}
 
-        {step === 6 && (
-          <div className="p-4 border rounded-lg shadow">
-            <h3 className="text-xl font-semibold mb-4">Confirmation</h3>
-            <p>Désignation: {selectedDesignationId}</p>
-            <p>Quantité: {quantity}</p>
-            <p>Origine: {origin}</p>
-            <p>Famille: {family}</p>
-            <button className="bg-green-600 text-white px-4 py-2 rounded-md mt-4" onClick={handleConfirm}>
-              Confirmer
-            </button>
-          </div>
-        )}
+{step === 6 && (
+  <div className="border-t-2 border-gray-300 py-4 mb-6">
+    <h3 className="text-2xl font-semibold mb-4">Confirmation</h3>
+    {codeArticle.length === 0 ? (
+      <p>Aucun article créé.</p>
+    ) : (
+      <table className="min-w-full bg-white border border-gray-300">
+        <thead>
+          <tr className="bg-gray-200 text-gray-600 text-left">
+            <th className="py-3 px-4 border">Désignation</th>
+            <th className="py-3 px-4 border">Origine</th>
+            <th className="py-3 px-4 border">Famille</th>
+            <th className="py-3 px-4 border">Code Article</th>
+            <th className="py-3 px-4 border">Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          {codeArticle.map((code, index) => {
+            const foundDesignation = designations.find(des => des.id === parseInt(selectedDesignationId));
+            const foundFamily = families.find(fam => fam.id === parseInt(family));
+
+            const designationName = foundDesignation?.nom || 'Non spécifiée';
+            const familyName = foundFamily?.nom || 'Non spécifiée';
+
+            return (
+              <tr key={index}>
+                <td className="py-3 px-4 border">{designationName}</td>
+                <td className="py-3 px-4 border">{origin}</td>
+                <td className="py-3 px-4 border">{familyName}</td>
+                <td className="py-3 px-4 border">{code}</td>
+                <td className="py-3 px-4 border">{statusArticle[index]}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    )}
+    <div className="mt-4">
+      <button className="bg-green-600 text-white px-4 py-2 rounded-md" onClick={handleSave}>
+        Enregistrer
+      </button>
+    </div>
+  </div>
+)}
+
+
       </div>
     </>
   );
 };
 
-export default ArticleManager;
+export default Designation;

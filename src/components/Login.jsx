@@ -16,13 +16,12 @@ const Login = () => {
 
     try {
       console.log(`Attempting to login with email: ${email}`);
-      const response = await axios.post('https://cnc-pdb.onrender.com/api/users/login/', {
+      const response = await axios.post('https://fbackup-cnc.onrender.com/api/users/login/', {
         email: email,
         password: password,
       });
 
       if (response.status === 200) {
-        console.log('Connexion réussie, response :', response.data);
 
         const { access, refresh } = response.data;
         localStorage.setItem('authToken', access);

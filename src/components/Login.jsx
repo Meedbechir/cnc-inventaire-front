@@ -15,7 +15,6 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      console.log(`Attempting to login with email: ${email}`);
       const response = await axios.post('https://fbackup-cnc.onrender.com/api/users/login/', {
         email: email,
         password: password,

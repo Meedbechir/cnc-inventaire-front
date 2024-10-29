@@ -15,6 +15,7 @@ const ArticleCreation = () => {
   const [filter, setFilter] = useState('');
   const itemsPerPage = 10;
 
+
   useEffect(() => {
     const fetchFamilies = async () => {
       try {
@@ -173,26 +174,27 @@ const ArticleCreation = () => {
           </tbody>
         </table>
 
-        {/* Pagination */}
-        {totalFiltered > 0 && (
-          <div className="flex justify-between mt-4">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200"
-            >
-              Précédent
-            </button>
-            <span>{`Page ${currentPage} sur ${totalPages}`}</span>
-            <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200"
-            >
-              Suivant
-            </button>
-          </div>
-        )}
+
+{totalFiltered > itemsPerPage && (
+  <div className="flex justify-between mt-4">
+    <button
+      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+      disabled={currentPage === 1}
+      className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-200"
+    >
+      Précédent
+    </button>
+    <span>{`Page ${currentPage} sur ${totalPages}`}</span>
+    <button
+      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+      disabled={currentPage === totalPages}
+      className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200"
+    >
+      Suivant
+    </button>
+  </div>
+)}
+
       </div>
     </>
   );

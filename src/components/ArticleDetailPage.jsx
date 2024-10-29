@@ -47,8 +47,8 @@ const ArticleDetailPage = () => {
             { label: "Origine", value: article.details_entree[0]?.origine_nom || 'Non spécifié' },
             { label: "Emplacement", value: article.details_entree[0]?.emplacement_nom || 'Pas défini' },
             { label: "Code Article", value: article.details_entree[0]?.code_article || 'Non généré' },
-            { label: "Marque", value: article.details_entree[0]?.marque || 'Non spécifié' },
-            { label: "Modèle", value: article.details_entree[0]?.modele || 'Non spécifié' },
+            { label: "Marque", value: article.marque || 'Non spécifié' },
+            { label: "Modèle", value: article.modele || 'Non spécifié' },
             { label: "Date Ajout", value: article.details_entree[0]?.date_ajout || 'Non spécifié' },
             { label: "État", value: article.details_entree[0]?.status?.status_article || 'Non spécifié' },
           ].map((item, index) => (

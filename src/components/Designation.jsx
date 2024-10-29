@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 const Designation = () => {
   const [step, setStep] = useState(1);
   const [origin, setOrigin] = useState("");
+  const [otherOrigin, setOtherOrigin] = useState(""); 
   const [designations, setDesignations] = useState([]);
   const [quantity, setQuantity] = useState("");
   const [selectedDesignationId, setSelectedDesignationId] = useState("");
@@ -34,7 +35,7 @@ const Designation = () => {
       const response = await axios.post("https://fbackup-cnc.onrender.com/api/articles/", {
         designation_id: selectedDesignationId,
         quantite: parseInt(quantity),
-        origine: origin,
+        origine: origin === "Autre" ? otherOrigin : origin, 
       });
 
       setArticles((prevArticles) => [...prevArticles, ...response.data.articles]);
@@ -50,19 +51,41 @@ const Designation = () => {
       toast.error(`Erreur lors de l'ajout de l'article: ${error.message}`);
     }
   };
-
+  
   const handleNextStep = () => {
-    if (step === 2) {
+    if (step === 1) {
+      if (!origin) {
+        toast.error("Veuillez sélectionner une origine.");
+        return;
+      }
+      if (origin === "Autre" && !otherOrigin) {
+        toast.error("Veuillez spécifier l'origine.");
+        return;
+      }
       setConfirmationData({
-        designation: designations.find(
-          (des) => des.id === parseInt(selectedDesignationId)
-        ),
-        origin,
+        designation: null,
+        origin: origin === "Autre" ? otherOrigin : origin,
+        quantity: null,
+      });
+    } else if (step === 2) {
+      if (!selectedDesignationId) {
+        toast.error("Veuillez sélectionner une désignation.");
+        return;
+      }
+      if (!quantity) {
+        toast.error("Veuillez entrer une quantité.");
+        return;
+      }
+      setConfirmationData({
+        designation: designations.find((des) => des.id === parseInt(selectedDesignationId)),
+        origin: origin === "Autre" ? otherOrigin : origin,
         quantity,
       });
     }
+    
     setStep(step + 1);
   };
+  
 
   return (
     <>
@@ -91,7 +114,10 @@ const Designation = () => {
                   type="radio"
                   value="Achat"
                   checked={origin === "Achat"}
-                  onChange={(e) => setOrigin(e.target.value)}
+                  onChange={(e) => {
+                    setOrigin(e.target.value);
+                    setOtherOrigin(""); 
+                  }}
                   required
                   className="mr-2"
                 />
@@ -102,13 +128,40 @@ const Designation = () => {
                   type="radio"
                   value="Don"
                   checked={origin === "Don"}
-                  onChange={(e) => setOrigin(e.target.value)}
+                  onChange={(e) => {
+                    setOrigin(e.target.value);
+                    setOtherOrigin(""); 
+                  }}
                   required
                   className="mr-2"
                 />
                 <span className="font-medium">Don</span>
               </label>
+              <label className="flex items-center text-gray-700 p-3 border border-gray-300 rounded-md shadow-sm hover:shadow-md transition">
+                <input
+                  type="radio"
+                  value="Autre"
+                  checked={origin === "Autre"}
+                  onChange={(e) => {
+                    setOrigin(e.target.value);
+                    setOtherOrigin(""); 
+                  }}
+                  required
+                  className="mr-2"
+                />
+                <span className="font-medium">Autre</span>
+              </label>
             </div>
+            {origin === "Autre" && ( 
+              <input
+                type="text"
+                value={otherOrigin}
+                onChange={(e) => setOtherOrigin(e.target.value)}
+                placeholder="Spécifiez l'origine"
+                className="border border-gray-300 rounded-md p-3 w-full shadow focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+                required
+              />
+            )}
             <button
               className="bg-blue-600 text-white px-6 py-3 rounded-md w-full transition duration-200 hover:bg-blue-700 shadow-md"
               onClick={handleNextStep}
@@ -153,48 +206,46 @@ const Designation = () => {
           </div>
         )}
 
-{step === 3 && (
-  <div className="border-t-2 border-gray-300 py-4 mb-6">
-    <h3 className="text-2xl font-semibold mb-4">Confirmation</h3>
-    <table className="min-w-full border-collapse border border-gray-200">
-      <thead>
-        <tr>
-          <th className="border border-gray-200 p-2">Désignation</th>
-          <th className="border border-gray-200 p-2">Quantité</th>
-          <th className="border border-gray-200 p-2">Marque</th>
-          <th className="border border-gray-200 p-2">Modèle</th>
-        </tr>
-      </thead>
-      <tbody>
-        {Array.from({ length: parseInt(quantity) }).map((_, index) => (
-          <tr key={index}>
-            <td className="border border-gray-200 p-2">
-              {designations.find(
-                (des) => des.id === parseInt(selectedDesignationId)
-              )?.nom || 'Non spécifiée'}
-            </td>
-            <td className="border border-gray-200 p-2">1</td>
-            <td className="border border-gray-200 p-2">
-              {designations.find(
-                (des) => des.id === parseInt(selectedDesignationId)
-              )?.marque || 'Non spécifié'}
-            </td>
-            <td className="border border-gray-200 p-2">
-              {designations.find(
-                (des) => des.id === parseInt(selectedDesignationId)
-              )?.modele || 'Non spécifié'}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-    <button className="bg-green-600 text-white px-4 py-2 rounded-md mt-4" onClick={handleConfirm}>
-      Confirmer
-    </button>
-  </div>
-)}
-
-
+        {step === 3 && (
+          <div className="border-t-2 border-gray-300 py-4 mb-6">
+            <h3 className="text-2xl font-semibold mb-4">Confirmation</h3>
+            <table className="min-w-full border-collapse border border-gray-200">
+              <thead>
+                <tr>
+                  <th className="border border-gray-200 p-2">Désignation</th>
+                  <th className="border border-gray-200 p-2">Quantité</th>
+                  <th className="border border-gray-200 p-2">Marque</th>
+                  <th className="border border-gray-200 p-2">Modèle</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: parseInt(quantity) }).map((_, index) => (
+                  <tr key={index}>
+                    <td className="border border-gray-200 p-2">
+                      {designations.find(
+                        (des) => des.id === parseInt(selectedDesignationId)
+                      )?.nom || 'Non spécifiée'}
+                    </td>
+                    <td className="border border-gray-200 p-2">1</td>
+                    <td className="border border-gray-200 p-2">
+                      {designations.find(
+                        (des) => des.id === parseInt(selectedDesignationId)
+                      )?.marque || 'Non spécifié'}
+                    </td>
+                    <td className="border border-gray-200 p-2">
+                      {designations.find(
+                        (des) => des.id === parseInt(selectedDesignationId)
+                      )?.modele || 'Non spécifié'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <button className="bg-green-600 text-white px-4 py-2 rounded-md mt-4" onClick={handleConfirm}>
+              Confirmer
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

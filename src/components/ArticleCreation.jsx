@@ -9,8 +9,11 @@ const ArticleCreation = () => {
   const [marque, setMarque] = useState('');
   const [modele, setModele] = useState('');
   const [families, setFamilies] = useState([]);
-  const [familiesMap, setFamiliesMap] = useState({}); 
+  const [familiesMap, setFamiliesMap] = useState({});
   const [designations, setDesignations] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filter, setFilter] = useState('');
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const fetchFamilies = async () => {
@@ -64,13 +67,28 @@ const ArticleCreation = () => {
     }
   };
 
+  const indexOfLastDesignation = currentPage * itemsPerPage;
+  const indexOfFirstDesignation = indexOfLastDesignation - itemsPerPage;
+
+  const filteredDesignations = designations.filter(designation => {
+    return (
+      designation.nom.toLowerCase().includes(filter.toLowerCase()) ||
+      designation.marque.toLowerCase().includes(filter.toLowerCase()) ||
+      designation.modele.toLowerCase().includes(filter.toLowerCase())
+    );
+  });
+
+  const totalFiltered = filteredDesignations.length;
+  const currentDesignations = filteredDesignations.slice(indexOfFirstDesignation, indexOfLastDesignation);
+  const totalPages = Math.ceil(totalFiltered / itemsPerPage);
+
   return (
     <>
       <Navbar />
       <ToastContainer />
 
       <div className="max-w-2xl mx-auto p-8 bg-white rounded-lg shadow-lg mt-12">
-        <h3 className="text-3xl font-semibold text-center text-gray-800 mb-6">Ajouter une Désignation</h3>
+        <h3 className="text-3xl font-semibold text-center text-gray-800 mb-6">Ajouter un Article</h3>
         <form onSubmit={handleDesignationSubmit} className="space-y-4">
           <div className="flex space-x-4">
             <input
@@ -118,7 +136,16 @@ const ArticleCreation = () => {
       </div>
 
       <div className="max-w-2xl mx-auto p-8 bg-white rounded-lg shadow-lg mt-12">
-        <h3 className="text-3xl font-semibold text-center text-gray-800 mb-6">Désignations Créées</h3>
+        <h3 className="text-3xl font-semibold text-center text-gray-800 mb-6">Articles Créés</h3>
+
+        <input
+          type="text"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          placeholder="Filtrer par nom, marque ou modèle"
+          className="border border-gray-300 rounded-md p-4 w-full mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+
         <table className="min-w-full bg-gray-100">
           <thead>
             <tr className="bg-gray-300">
@@ -129,16 +156,43 @@ const ArticleCreation = () => {
             </tr>
           </thead>
           <tbody>
-            {designations.map((designation) => (
-              <tr key={designation.id} className="border-b hover:bg-gray-200">
-                <td className="px-4 py-2">{designation.nom}</td>
-                <td className="px-4 py-2">{familiesMap[designation.famille]}</td> 
-                <td className="px-4 py-2">{designation.marque}</td>
-                <td className="px-4 py-2">{designation.modele}</td>
+            {currentDesignations.length > 0 ? (
+              currentDesignations.map((designation) => (
+                <tr key={designation.id} className="border-b hover:bg-gray-200">
+                  <td className="px-4 py-2">{designation.nom}</td>
+                  <td className="px-4 py-2">{familiesMap[designation.famille]}</td> 
+                  <td className="px-4 py-2">{designation.marque}</td>
+                  <td className="px-4 py-2">{designation.modele}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="text-center px-4 py-2">Aucun article trouvé.</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
+
+        {/* Pagination */}
+        {totalFiltered > 0 && (
+          <div className="flex justify-between mt-4">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200"
+            >
+              Précédent
+            </button>
+            <span>{`Page ${currentPage} sur ${totalPages}`}</span>
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200"
+            >
+              Suivant
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

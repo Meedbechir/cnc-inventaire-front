@@ -25,6 +25,9 @@ const Navbar = () => {
           <Link to="/home" className="text-white text-4xl hover:text-gray-400">
             CNC
           </Link>
+          <h2 className='ml-12 text-white text-2xl'>
+            Année_inventaire : 2024
+          </h2>
         </div>
 
         <div className="md:hidden">

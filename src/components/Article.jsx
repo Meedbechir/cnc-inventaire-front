@@ -11,6 +11,7 @@ const Article = () => {
   const articlesPerPage = 10;
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [selectedDesignation, setSelectedDesignation] = useState('');
 
   useEffect(() => {
     fetchArticles();
@@ -25,6 +26,8 @@ const Article = () => {
       }
       const data = await response.json();
 
+
+
       const mappedData = data.map(article => ({
         ...article,
         famille: article.famille_nom,
@@ -34,6 +37,8 @@ const Article = () => {
         etat: article.details_entree[0]?.status?.status_article || "non spécifié",
         code_article: article.details_entree[0]?.code_article || "non généré",
       }));
+
+
 
       setArticles(mappedData);
     } catch (error) {
@@ -99,16 +104,25 @@ const Article = () => {
     }
   };
 
-  const indexOfLastArticle = currentPage * articlesPerPage;
-  const indexOfFirstArticle = indexOfLastArticle - articlesPerPage;
+
+  const handleDesignationChange = (e) => {
+    setSelectedDesignation(e.target.value);
+    setCurrentPage(1); 
+  };
+
+  const uniqueDesignations = [...new Set(articles.map(article => article.designation))];
 
   const filteredArticles = articles.filter(article =>
-    article.designation && article.designation.toLowerCase().includes(searchTerm.toLowerCase())
+    (selectedDesignation === '' || article.designation === selectedDesignation) &&
+    article.designation.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const currentArticles = filteredArticles.slice(indexOfFirstArticle, indexOfLastArticle);
-  const totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
+  const totalFilteredCount = filteredArticles.length;
 
+  const indexOfLastArticle = currentPage * articlesPerPage;
+  const indexOfFirstArticle = indexOfLastArticle - articlesPerPage;
+  const currentArticles = filteredArticles.slice(indexOfFirstArticle, indexOfLastArticle);
+  
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
@@ -126,6 +140,16 @@ const Article = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="border border-gray-400 rounded-md w-full max-w-xs ml-4 p-2 ms-auto"
           />
+          <select 
+            value={selectedDesignation} 
+            onChange={handleDesignationChange} 
+            className="border border-gray-400 rounded-md ml-4 p-2"
+          >
+            <option value="">Tous les Articles</option>
+            {uniqueDesignations.map((designation, index) => (
+              <option key={index} value={designation}>{designation}</option>
+            ))}
+          </select>
         </div>
 
         {loading ? (
@@ -137,15 +161,20 @@ const Article = () => {
             Aucun article.
           </div>
         ) : (
-          <ArticleTable
-            articles={currentArticles}
-            handleLocationChange={handleLocationChange}
-            handleEdit={handleEdit}
-            handleValidate={handleValidate}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            setCurrentPage={setCurrentPage}
-          />
+          <>
+            <div className="text-center mb-4 text-xl">
+              Total : {totalFilteredCount}
+            </div>
+            <ArticleTable
+              articles={currentArticles}
+              handleLocationChange={handleLocationChange}
+              handleEdit={handleEdit}
+              handleValidate={handleValidate}
+              currentPage={currentPage}
+              totalPages={Math.ceil(totalFilteredCount / articlesPerPage)}
+              setCurrentPage={setCurrentPage}
+            />
+          </>
         )}
       </div>
     </>

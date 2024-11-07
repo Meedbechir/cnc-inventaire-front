@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import Navbar from './Navbar';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ArticleCreation = () => {
   const [newDesignation, setNewDesignation] = useState('');
@@ -14,7 +15,6 @@ const ArticleCreation = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState('');
   const itemsPerPage = 10;
-
 
   useEffect(() => {
     const fetchFamilies = async () => {
@@ -45,8 +45,26 @@ const ArticleCreation = () => {
     fetchDesignations();
   }, []);
 
+  const isValidDesignation = (designation) => /^[a-zA-Z\s]+$/.test(designation);
+  const isValidMarque = (marque) => /^[a-zA-Z\s]+$/.test(marque);
+  const isValidModele = (modele) => /^[a-zA-Z0-9\s]+$/.test(modele);
+
   const handleDesignationSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isValidDesignation(newDesignation)) {
+      toast.error('Le nom de l\'article ne doit contenir que des lettres et des espaces.');
+      return;
+    }
+    if (!isValidMarque(marque)) {
+      toast.error('La marque ne doit contenir que des lettres et des espaces.');
+      return;
+    }
+    if (!isValidModele(modele)) {
+      toast.error('Le modèle ne doit contenir que des lettres, chiffres et espaces.');
+      return;
+    }
+
     const designationData = {
       nom: newDesignation,
       famille: family,
@@ -130,7 +148,11 @@ const ArticleCreation = () => {
               required
             />
           </div>
-          <button className="bg-green-600 text-white px-4 py-2 rounded-md w-full mt-4 hover:bg-green-700 transition duration-200" type="submit">
+          <button 
+            className={`bg-green-600 text-white px-4 py-2 rounded-md w-full mt-4 hover:bg-green-700 transition duration-200 ${!isValidDesignation(newDesignation) || !isValidMarque(marque) || !isValidModele(modele) ? 'opacity-50 cursor-not-allowed' : ''}`} 
+            type="submit" 
+            disabled={!isValidDesignation(newDesignation) || !isValidMarque(marque) || !isValidModele(modele)}
+          >
             Créer
           </button>
         </form>
@@ -174,27 +196,25 @@ const ArticleCreation = () => {
           </tbody>
         </table>
 
-
-{totalFiltered > itemsPerPage && (
-  <div className="flex justify-between mt-4">
-    <button
-      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-      disabled={currentPage === 1}
-      className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-200"
-    >
-      Précédent
-    </button>
-    <span>{`Page ${currentPage} sur ${totalPages}`}</span>
-    <button
-      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-      disabled={currentPage === totalPages}
-      className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200"
-    >
-      Suivant
-    </button>
-  </div>
-)}
-
+        {totalFiltered > itemsPerPage && (
+          <div className="flex justify-between mt-4">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration=200"
+            >
+              Précédent
+            </button>
+            <span>{`Page ${currentPage} sur ${totalPages}`}</span>
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="bg-green-500 text-white px=4 py=2 rounded-md hover:bg-green=700 transition duration=200"
+            >
+              Suivant
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

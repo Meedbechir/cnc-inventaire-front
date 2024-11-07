@@ -72,8 +72,8 @@ const Designation = () => {
         toast.error("Veuillez sélectionner une désignation.");
         return;
       }
-      if (!quantity) {
-        toast.error("Veuillez entrer une quantité.");
+      if (!quantity || quantity <= 0) {
+        toast.error("La quantité doit être un nombre positif.");
         return;
       }
       setConfirmationData({
@@ -82,9 +82,10 @@ const Designation = () => {
         quantity,
       });
     }
-    
+  
     setStep(step + 1);
   };
+  
   
 
   return (
